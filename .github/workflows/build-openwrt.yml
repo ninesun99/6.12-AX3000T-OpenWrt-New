@@ -16,8 +16,8 @@ on:
         default: 'false'
 
 env:
-  REPO_URL: https://github.com/padavanonly/immortalwrt-mt798x-6.6
-  REPO_BRANCH: openwrt-24.10-6.6
+  REPO_URL: https://github.com/chasey-dev/immortalwrt-mt798x-rebase
+  REPO_BRANCH: 25.12
   FEEDS_CONF: feeds.conf.default  # 自定义 feeds 配置文件
   CONFIG_FILE: .config  # 配置文件
   DIY_P1_SH: diy-part1.sh  # 自定义脚本 1
