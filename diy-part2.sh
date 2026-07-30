@@ -1,22 +1,29 @@
 #!/bin/bash
-# 将默认网关从 192.168.1.1 修改为你习惯的 192.168.8.1。注意 ZC360 模板默认 IP 是 192.168.1.1
+# ============================================================
+# diy-part2.sh —— 在"安装feeds"之后、"编译"之前自动运行
+# 你不用懂，整段覆盖即可
+# ============================================================
+
+# ① 把后台默认 IP 从 192.168.1.1 改成 192.168.8.1
+#    （6.12 源码默认就是 192.168.1.1，所以这行能生效）
 sed -i 's/192.168.1.1/192.168.8.1/g' package/base-files/files/bin/config_generate
 
-# 强制将默认主题设为 Argon
+# ② 把默认主题改成更好看的 Argon
 sed -i 's/luci-theme-bootstrap/luci-theme-argon/g' feeds/luci/collections/luci/Makefile
 
-# 以上游 defconfig 为基底（获取正确的平台配置），但只编译小米 AX3000T 固件
+# ③ 去掉"智能辅助系统更新"（在线升级工具）
+#    这种闭源驱动固件用不了它，留着怕你以后点错在线升级变砖，所以删掉
+sed -i 's/ \+luci-app-attendedsysupgrade//g' feeds/luci/collections/luci/Makefile
+sed -i 's/+luci-app-attendedsysupgrade//g' feeds/luci/collections/luci/Makefile
+
+# ④ 用 6.12 源码自带的 defconfig 当"基底配置"
+#    （这个基底里有正确的平台设置和闭源驱动框架）
 mv .config .config.bak
 cp -f defconfig/mt7981-ax3000.config .config
 
-# 保留 CONFIG_TARGET_MULTI_PROFILE=y（多设备模式），这样才能精确选择单个设备
-# 如果删掉它，make defconfig 会回退到单 Profile 模式，自动选择字母序第一个设备（ABT ASR3000）
-
-# 删除所有设备选择行和设备包配置行
+# ⑤ 删掉基底里所有设备，只保留"小米 AX3000T（stock 分区）"
 sed -i '/CONFIG_TARGET_DEVICE_/d' .config
-
-# 只添加小米 AX3000T（注意子目标是 filogic，不是 mt7981）
 echo "CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_xiaomi_mi-router-ax3000t=y" >> .config
 
-# 追加用户自定义的软件包选项（过滤掉目标平台相关行，避免与 defconfig 冲突）
+# ⑥ 把你上面 .config 里写的所有包（闭源驱动、USB、个人定制等）追加进来
 grep -E '=y$|=m$' .config.bak | grep -v 'CONFIG_TARGET_' >> .config
