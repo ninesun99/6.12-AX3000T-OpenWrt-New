@@ -5,8 +5,8 @@ permissions:
 
 on:
   schedule:
-    # 每周日 UTC 00:00 触发（= 北京时间 08:00）
-    - cron: "0 0 * * 0"
+    # 每天 UTC 00:00 触发（= 北京时间 08:00）
+    - cron: "0 0 * * *"
   repository_dispatch:  # 当收到 repository_dispatch 事件时触发
   workflow_dispatch:    # 允许手动触发工作流
     inputs:
@@ -217,7 +217,7 @@ jobs:
       uses: dev-drprasad/delete-older-releases@v0.1.0
       if: env.UPLOAD_RELEASE == 'true' && !cancelled()
       with:
-        keep_latest: 3
+        keep_latest: 30
         delete_tags: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
